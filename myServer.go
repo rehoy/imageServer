@@ -8,6 +8,7 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"image/png"
+	"math"
 	"net/http"
 	"os"
 	"strings"
@@ -17,7 +18,8 @@ func SaveImg(img *image.RGBA, name string) {
 
 	outfile, err := os.Create(name)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Could not create file with name %s", name)
+		return
 	}
 
 	defer outfile.Close()
@@ -86,9 +88,9 @@ func GetBlurred(img image.RGBA) *image.RGBA {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 
 			r, g, b, a, n := uint32(0), uint32(0), uint32(0), uint32(0), uint32(0)
-			for i := max(0, y-10); i < min(bounds.Max.Y, y+10); i++ {
+			for i := max(0, y-1); i < min(bounds.Max.Y, y+1); i++ {
 
-				for j := max(0, x-10); j < min(bounds.Max.X, x+10); j++ {
+				for j := max(0, x-1); j < min(bounds.Max.X, x+1); j++ {
 
 					n += 1
 					original_color := img.At(j, i)
@@ -156,13 +158,14 @@ func GetEdges(img image.RGBA) *image.RGBA {
 	}
 
 	horizontal_kernel := [3][3]int{{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}}
-	//vertical_kernel := [3][3]int{{-1, -2 - 1}, {0, 0, 0}, {1, 2, 1}}
+	vertical_kernel := [3][3]int{{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}}
 
 	sobel := image.NewRGBA(bounds)
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			valX := 0 // Sum for horizontal kernel
+			valY := 0
 			// Iterate over the 3x3 kernel
 			for ky := -1; ky <= 1; ky++ {
 				for kx := -1; kx <= 1; kx++ {
@@ -174,15 +177,20 @@ func GetEdges(img image.RGBA) *image.RGBA {
 					if neighborX >= bounds.Min.X && neighborX < bounds.Max.X &&
 						neighborY >= bounds.Min.Y && neighborY < bounds.Max.Y {
 						// Apply the horizontal kernel
-						kernelValue := horizontal_kernel[ky+1][kx+1]
+						horizontal_kernelValue := horizontal_kernel[ky+1][kx+1]
+						vertical_kernelValue := vertical_kernel[ky+1][kx+1]
+
 						neighborIntensity := int(gray.GrayAt(neighborX, neighborY).Y)
-						valX += kernelValue * neighborIntensity
+						valX += horizontal_kernelValue * neighborIntensity
+						valY += vertical_kernelValue * neighborIntensity
 					}
 				}
 			}
-			// Convert the result to a grayscale value and then RGBA
-			g := uint8(clamp(valX, 0, 255)) // A helper function to clamp values
-			sobel.Set(x, y, color.RGBA{g, g, g, 255})
+			magnitude := math.Sqrt(float64(valX*valX) + float64(valY*valY))
+
+			// Convert to grayscale and clamp
+			abs_value := uint8(clamp(int(magnitude), 0, 255))
+			sobel.Set(x, y, color.RGBA{abs_value, abs_value, abs_value, 255})
 		}
 	}
 
@@ -212,7 +220,7 @@ func LoadImg(path string) (*image.RGBA, error) { // Open the image file
 	img, _, err := image.Decode(file)
 	if err != nil {
 		fmt.Println("Error decoding image:", err)
-		panic(err)
+		return nil, err
 	}
 
 	// Output image format
