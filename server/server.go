@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+  "sync"
 )
 
 type Server struct {
@@ -273,6 +274,14 @@ func (p *ImageProcessor) GetGray(img image.RGBA) *image.RGBA {
 	return gray_img
 }
 
+func (p *ImageProcessor) sobelAccumulator(img *image.RGBA, kernel [][]int, wg *sync.WaitGroup) int{
+  defer wg.Done()
+
+  val
+
+  return 
+}
+
 func (p *ImageProcessor) GetEdges(img image.RGBA) *image.RGBA {
 
 	gray_img := p.GetGray(img)
@@ -290,6 +299,15 @@ func (p *ImageProcessor) GetEdges(img image.RGBA) *image.RGBA {
 
 	horizontal_kernel := [3][3]int{{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}}
 	vertical_kernel := [3][3]int{{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}}
+
+  var wg sync.WaitGroup
+  wg.Add(2)
+
+  go valX := sobelAccumulator(gray, horizontal_kernel, wg)
+  go valY := sobelAccumulator(gray, horizontal_kernel, wg)
+
+
+
 
 	sobel := image.NewRGBA(bounds)
 
