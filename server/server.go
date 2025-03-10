@@ -1,13 +1,13 @@
-package main
+package server
 
 import (
-	"flag"
 	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
+	"log"
 	"math"
 	"net/http"
 	"os"
@@ -19,20 +19,23 @@ type Server struct {
 	port         string
 	image_folder string
 	processor    ImageProcessor
+	logger       *log.Logger
 }
 
 type ImageProcessor struct {
 }
 
 func NewServer(name, port, image_folder string) *Server {
-	return &Server{name, port, image_folder, ImageProcessor{}}
+	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	return &Server{name, port, image_folder, ImageProcessor{}, logger}
 }
 
-func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Handler(w http.ResponseWriter, r *http.Request) {
+	s.logger.Println("Received request at /")
 	w.Write([]byte("Hello, World!"))
 }
 
-func (s *Server) processHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ProcessHandler(w http.ResponseWriter, r *http.Request) {
 
 	image_folder := "images"
 	queryParams := r.URL.Query()
@@ -40,14 +43,18 @@ func (s *Server) processHandler(w http.ResponseWriter, r *http.Request) {
 	action := queryParams.Get("action")
 	new_name := queryParams.Get("name")
 
-	fmt.Printf("filename: %s, action: %s", filename, action)
+	//queryString := s.queryAsString(queryParams)
+
+	s.logger.Println("received request at /process with params:", queryParams)
 
 	if filename == "" || action == "" {
+		s.logger.Printf("missing filename(%s) or or action(%s)\n", filename, action)
 		http.Error(w, "missing filename or action in parameters", http.StatusBadRequest)
 	}
 
-	img, ok := LoadImg(image_folder + "/" + filename)
+	img, ok := s.LoadImg(image_folder + "/" + filename)
 	if ok != nil {
+		s.logger.Printf("could not load image %s\n", filename)
 		http.Error(w, "file does not exist on server", http.StatusNotFound)
 	}
 
@@ -73,8 +80,11 @@ func (s *Server) processHandler(w http.ResponseWriter, r *http.Request) {
 		outfile_name = new_name + "." + suffix
 	}
 
+	s.logger.Printf("processing image: %s with action: %s and saving it to: %s\n", filename, action, outfile_name)
+
 	outfile, ok := os.Create(image_folder + "/" + outfile_name)
 	if ok != nil {
+		s.logger.Printf("could not save file: %s\n", outfile_name)
 		http.Error(w, "could not create file", http.StatusConflict)
 	}
 	defer outfile.Close()
@@ -85,6 +95,8 @@ func (s *Server) processHandler(w http.ResponseWriter, r *http.Request) {
 	case "jpg":
 		opts := jpeg.Options{Quality: 80}
 		jpeg.Encode(outfile, processed, &opts)
+	default:
+		s.logger.Printf("Could not encode. Suffix was not a supported type(%s)\n", suffix)
 	}
 
 	fmt.Fprintf(w, "did action %s to file: %s and saved it as %s", action, filename, outfile_name)
@@ -96,8 +108,10 @@ func (s *Server) deleteImage(path string) error {
 
 	err := os.Remove(filepath)
 	if err != nil {
+		s.logger.Printf("could not delete image: %s\n", path)
 		return fmt.Errorf("failed to delete file %s: %v ", path, err)
 	}
+	s.logger.Printf("deleted image: %s from folder %s\n", path, s.image_folder)
 
 	return nil
 
@@ -120,14 +134,14 @@ func (s *Server) deleteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not delete file", http.StatusBadRequest)
 	}
 
-	fmt.Fprintf(w, "deleted %s")
+	fmt.Fprintf(w, "deleted %s", file)
 }
 
 func (s *Server) SaveImg(img *image.RGBA, name string) {
 
 	outfile, err := os.Create(name)
 	if err != nil {
-		fmt.Printf("Could not create file with name %s", name)
+		fmt.Printf("Could not create file with name %s\n", name)
 		return
 	}
 
@@ -349,26 +363,4 @@ func (s *Server) LoadImg(path string) (*image.RGBA, error) { // Open the image f
 	draw.Draw(new_RGBA, new_RGBA.Bounds(), img, image.Point{0, 0}, draw.Src)
 
 	return new_RGBA, nil
-}
-
-func main() {
-	port_number := flag.String("port", "", "port number")
-
-	flag.Parse()
-
-	if *port_number == "" {
-		fmt.Println("no port number provided")
-		flag.Usage()
-		os.Exit(1)
-	}
-	port := ":" + *port_number
-
-	server := NewServer("server", port, "images")
-
-	http.HandleFunc("/", server.handler)
-	http.HandleFunc("/process", server.processHandler)
-
-	fmt.Printf("Listening on port %s\n", port)
-	http.ListenAndServe(port, nil)
-
 }

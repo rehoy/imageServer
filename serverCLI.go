@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// Command-line flags
+	command := flag.String("command", "", "delete or process")
 	fileName := flag.String("file", "", "Name of the image file to process")
 	action := flag.String("action", "", "Action to perform on the image (e.g., invert)")
 	name := flag.String("name", "", "name to save the processed as")
@@ -23,7 +24,7 @@ func main() {
 	}
 
 	// Construct the request URL
-	baseURL := "http://localhost:8080/process"
+	baseURL := "http://localhost:8080/"
 	requestURL, err := url.Parse(baseURL)
 	if err != nil {
 		fmt.Println("Error parsing URL:", err)

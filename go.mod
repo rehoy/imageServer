@@ -1,4 +1,4 @@
-module images
+module github.uio.no/oysteere/myserver
 
 go 1.23.1
 
