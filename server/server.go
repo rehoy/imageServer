@@ -12,8 +12,19 @@ import (
 	"net/http"
 	"os"
 	"strings"
-  "sync"
 )
+
+const (
+	INVERT = "invert"
+	SOBEL  = "sobel"
+	GRAY   = "gray"
+	BLUR   = "blur"
+)
+
+type Task struct {
+	image  image.RGBA
+	action string
+}
 
 type Server struct {
 	name         string
@@ -32,12 +43,13 @@ func NewServer(name, port, image_folder string) *Server {
 }
 
 func (s *Server) Handler(w http.ResponseWriter, r *http.Request) {
-	s.logger.Println("Received request at /")
-	w.Write([]byte("Hello, World!"))
+	go func() {
+		s.logger.Println("Received request at /")
+		w.Write([]byte("Hello, World!"))
+	}()
 }
 
-func (s *Server) ProcessHandler(w http.ResponseWriter, r *http.Request) {
-
+func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 	image_folder := "images"
 	queryParams := r.URL.Query()
 	filename := queryParams.Get("file")
@@ -61,13 +73,13 @@ func (s *Server) ProcessHandler(w http.ResponseWriter, r *http.Request) {
 
 	var processed *image.RGBA
 	switch action {
-	case "invert":
+	case INVERT:
 		processed = s.processor.GetInverted(*img)
-	case "blur":
+	case BLUR:
 		processed = s.processor.GetBlurred(*img)
-	case "gray":
+	case GRAY:
 		processed = s.processor.GetGray(*img)
-	case "sobel":
+	case SOBEL:
 		processed = s.processor.GetEdges(*img)
 	}
 
@@ -101,6 +113,12 @@ func (s *Server) ProcessHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "did action %s to file: %s and saved it as %s", action, filename, outfile_name)
+
+}
+
+func (s *Server) ProcessHandler(w http.ResponseWriter, r *http.Request) {
+	go s.handleProcess(w, r)
+
 }
 
 func (s *Server) deleteImage(path string) error {
@@ -274,14 +292,6 @@ func (p *ImageProcessor) GetGray(img image.RGBA) *image.RGBA {
 	return gray_img
 }
 
-func (p *ImageProcessor) sobelAccumulator(img *image.RGBA, kernel [][]int, wg *sync.WaitGroup) int{
-  defer wg.Done()
-
-  val
-
-  return 
-}
-
 func (p *ImageProcessor) GetEdges(img image.RGBA) *image.RGBA {
 
 	gray_img := p.GetGray(img)
@@ -299,15 +309,6 @@ func (p *ImageProcessor) GetEdges(img image.RGBA) *image.RGBA {
 
 	horizontal_kernel := [3][3]int{{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}}
 	vertical_kernel := [3][3]int{{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}}
-
-  var wg sync.WaitGroup
-  wg.Add(2)
-
-  go valX := sobelAccumulator(gray, horizontal_kernel, wg)
-  go valY := sobelAccumulator(gray, horizontal_kernel, wg)
-
-
-
 
 	sobel := image.NewRGBA(bounds)
 
