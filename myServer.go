@@ -14,6 +14,114 @@ import (
 	"strings"
 )
 
+type Server struct {
+	name         string
+	port         string
+	image_folder string
+	processor    ImageProcessor
+}
+
+type ImageProcessor struct {
+}
+
+func NewServer(name, port, image_folder string) *Server {
+	return &Server{name, port, image_folder, ImageProcessor{}}
+}
+
+func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello, World!"))
+}
+
+func (s *Server) processHandler(w http.ResponseWriter, r *http.Request) {
+
+	image_folder := "images"
+	queryParams := r.URL.Query()
+	filename := queryParams.Get("file")
+	action := queryParams.Get("action")
+	new_name := queryParams.Get("name")
+
+	fmt.Printf("filename: %s, action: %s", filename, action)
+
+	if filename == "" || action == "" {
+		http.Error(w, "missing filename or action in parameters", http.StatusBadRequest)
+	}
+
+	img, ok := LoadImg(image_folder + "/" + filename)
+	if ok != nil {
+		http.Error(w, "file does not exist on server", http.StatusNotFound)
+	}
+
+	var processed *image.RGBA
+	switch action {
+	case "invert":
+		processed = GetInverted(*img)
+	case "blur":
+		processed = GetBlurred(*img)
+	case "gray":
+		processed = GetGray(*img)
+	case "sobel":
+		processed = GetEdges(*img)
+	}
+
+	split_filename := strings.Split(filename, ".")
+	suffix := split_filename[1]
+
+	var outfile_name string
+	if new_name == "" {
+		outfile_name = action + filename
+	} else {
+		outfile_name = new_name + "." + suffix
+	}
+
+	outfile, ok := os.Create(image_folder + "/" + outfile_name)
+	if ok != nil {
+		http.Error(w, "could not create file", http.StatusConflict)
+	}
+	defer outfile.Close()
+
+	switch suffix {
+	case "png":
+		png.Encode(outfile, processed)
+	case "jpg":
+		opts := jpeg.Options{Quality: 80}
+		jpeg.Encode(outfile, processed, &opts)
+	}
+
+	fmt.Fprintf(w, "did action %s to file: %s and saved it as %s", action, filename, outfile_name)
+}
+
+func (s *Server) deleteImage(path string) error {
+
+	filepath := s.image_folder + "/" + path
+
+	err := os.Remove(filepath)
+	if err != nil {
+		return fmt.Errorf("failed to delete file %s: %v ", path, err)
+	}
+
+	return nil
+
+}
+
+func (s *Server) deleteHandler(w http.ResponseWriter, r *http.Request) {
+
+	queryParams := r.URL.Query()
+	file := queryParams.Get("file")
+
+	if file == "" {
+
+		http.Error(w, "file parameter not", http.StatusBadRequest)
+
+	}
+
+	err := s.deleteImage(file)
+
+	if err != nil {
+		http.Error(w, "could not delete file", http.StatusBadRequest)
+	}
+
+}
+
 func SaveImg(img *image.RGBA, name string) {
 
 	outfile, err := os.Create(name)
@@ -79,7 +187,15 @@ func GetInverted(img image.RGBA) *image.RGBA {
 	return inverted
 }
 
-func GetBlurred(img image.RGBA) *image.RGBA {
+func GetBlurred(img image.RGBA, args ...int) *image.RGBA {
+
+	var blurStrength int
+
+	if len(args) == 0 {
+		blurStrength = 7
+	} else {
+		blurStrength = args[0]
+	}
 
 	bounds := img.Bounds()
 	blurred := image.NewRGBA(bounds)
@@ -88,9 +204,9 @@ func GetBlurred(img image.RGBA) *image.RGBA {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 
 			r, g, b, a, n := uint32(0), uint32(0), uint32(0), uint32(0), uint32(0)
-			for i := max(0, y-1); i < min(bounds.Max.Y, y+1); i++ {
+			for i := max(0, y-blurStrength); i < min(bounds.Max.Y, y+blurStrength); i++ {
 
-				for j := max(0, x-1); j < min(bounds.Max.X, x+1); j++ {
+				for j := max(0, x-blurStrength); j < min(bounds.Max.X, x+blurStrength); j++ {
 
 					n += 1
 					original_color := img.At(j, i)
@@ -234,68 +350,6 @@ func LoadImg(path string) (*image.RGBA, error) { // Open the image file
 	return new_RGBA, nil
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, World!"))
-}
-
-func processHandler(w http.ResponseWriter, r *http.Request) {
-
-	image_folder := "images"
-	queryParams := r.URL.Query()
-	filename := queryParams.Get("file")
-	action := queryParams.Get("action")
-	new_name := queryParams.Get("name")
-
-	fmt.Printf("filename: %s, action: %s", filename, action)
-
-	if filename == "" || action == "" {
-		http.Error(w, "missing filename or action in parameters", http.StatusBadRequest)
-	}
-
-	img, ok := LoadImg(image_folder + "/" + filename)
-	if ok != nil {
-		http.Error(w, "file does not exist on server", http.StatusNotFound)
-	}
-
-	var processed *image.RGBA
-	switch action {
-	case "invert":
-		processed = GetInverted(*img)
-	case "blur":
-		processed = GetBlurred(*img)
-	case "gray":
-		processed = GetGray(*img)
-	case "sobel":
-		processed = GetEdges(*img)
-	}
-
-	split_filename := strings.Split(filename, ".")
-	suffix := split_filename[1]
-
-	var outfile_name string
-	if new_name == "" {
-		outfile_name = action + filename
-	} else {
-		outfile_name = new_name + "." + suffix
-	}
-
-	outfile, ok := os.Create(image_folder + "/" + outfile_name)
-	if ok != nil {
-		http.Error(w, "could not create file", http.StatusConflict)
-	}
-	defer outfile.Close()
-
-	switch suffix {
-	case "png":
-		png.Encode(outfile, processed)
-	case "jpg":
-		opts := jpeg.Options{Quality: 80}
-		jpeg.Encode(outfile, processed, &opts)
-	}
-
-	fmt.Fprintf(w, "did action %s to file: %s and saved it as %s", action, filename, outfile_name)
-}
-
 func main() {
 	port_number := flag.String("port", "", "port number")
 
@@ -308,8 +362,10 @@ func main() {
 	}
 	port := ":" + *port_number
 
-	http.HandleFunc("/", handler)
-	http.HandleFunc("/process", processHandler)
+	server := NewServer("server", port, "images")
+
+	http.HandleFunc("/", server.handler)
+	http.HandleFunc("/process", server.processHandler)
 
 	fmt.Printf("Listening on port %s\n", port)
 	http.ListenAndServe(port, nil)
