@@ -54,13 +54,13 @@ func (s *Server) processHandler(w http.ResponseWriter, r *http.Request) {
 	var processed *image.RGBA
 	switch action {
 	case "invert":
-		processed = GetInverted(*img)
+		processed = s.processor.GetInverted(*img)
 	case "blur":
-		processed = GetBlurred(*img)
+		processed = s.processor.GetBlurred(*img)
 	case "gray":
-		processed = GetGray(*img)
+		processed = s.processor.GetGray(*img)
 	case "sobel":
-		processed = GetEdges(*img)
+		processed = s.processor.GetEdges(*img)
 	}
 
 	split_filename := strings.Split(filename, ".")
@@ -120,9 +120,10 @@ func (s *Server) deleteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not delete file", http.StatusBadRequest)
 	}
 
+	fmt.Fprintf(w, "deleted %s")
 }
 
-func SaveImg(img *image.RGBA, name string) {
+func (s *Server) SaveImg(img *image.RGBA, name string) {
 
 	outfile, err := os.Create(name)
 	if err != nil {
@@ -149,7 +150,7 @@ func SaveImg(img *image.RGBA, name string) {
 
 }
 
-func InvertImg(img *image.RGBA) {
+func (p *ImageProcessor) InvertImg(img *image.RGBA) {
 	bounds := img.Bounds()
 	Max := bounds.Max
 	width, height := Max.X, Max.Y
@@ -166,7 +167,7 @@ func InvertImg(img *image.RGBA) {
 
 }
 
-func GetInverted(img image.RGBA) *image.RGBA {
+func (p *ImageProcessor) GetInverted(img image.RGBA) *image.RGBA {
 	bounds := img.Bounds()
 	inverted := image.NewRGBA(bounds)
 
@@ -187,7 +188,7 @@ func GetInverted(img image.RGBA) *image.RGBA {
 	return inverted
 }
 
-func GetBlurred(img image.RGBA, args ...int) *image.RGBA {
+func (p *ImageProcessor) GetBlurred(img image.RGBA, args ...int) *image.RGBA {
 
 	var blurStrength int
 
@@ -233,7 +234,7 @@ func GetBlurred(img image.RGBA, args ...int) *image.RGBA {
 	return blurred
 }
 
-func GetGray(img image.RGBA) *image.RGBA {
+func (p *ImageProcessor) GetGray(img image.RGBA) *image.RGBA {
 	bounds := img.Bounds()
 	gray := image.NewGray(bounds)
 
@@ -258,9 +259,9 @@ func GetGray(img image.RGBA) *image.RGBA {
 	return gray_img
 }
 
-func GetEdges(img image.RGBA) *image.RGBA {
+func (p *ImageProcessor) GetEdges(img image.RGBA) *image.RGBA {
 
-	gray_img := GetGray(img)
+	gray_img := p.GetGray(img)
 
 	bounds := img.Bounds()
 	gray := image.NewGray(bounds)
@@ -322,7 +323,7 @@ func clamp(value, min, max int) int {
 	return value
 }
 
-func LoadImg(path string) (*image.RGBA, error) { // Open the image file
+func (s *Server) LoadImg(path string) (*image.RGBA, error) { // Open the image file
 	file, err := os.Open(path) // Replace with your image file name
 	image.RegisterFormat("", "\x89PNG\r\n\x1a\n", png.Decode, png.DecodeConfig)
 	image.RegisterFormat("jpeg", "\xff\xd8", jpeg.Decode, jpeg.DecodeConfig)
