@@ -23,10 +23,26 @@ func main() {
 	s := server.NewServer("server", port, "images")
 
 	http.HandleFunc("/", s.Handler)
-	http.HandleFunc("/process", s.ProcessHandler)
+	http.HandleFunc("/process", corsMiddleware(s.ProcessHandler))
 	http.HandleFunc("/delete", s.DeleteHandler)
 
 	fmt.Printf("Listening on port %s\n", port)
 	http.ListenAndServe(port, nil)
 
+}
+func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Adjust to allow requests from 'http://localhost:8081'
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Handle preflight OPTIONS requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next(w, r)
+	}
 }
