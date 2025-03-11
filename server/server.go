@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 )
 
 const (
@@ -22,8 +23,9 @@ const (
 )
 
 type Task struct {
-	image  image.RGBA
-	action string
+	filename string
+	image    image.RGBA
+	action   string
 }
 
 type Server struct {
@@ -32,6 +34,29 @@ type Server struct {
 	image_folder string
 	processor    ImageProcessor
 	logger       *log.Logger
+}
+
+type Worker struct {
+	id        int
+	taskChan  chan Task
+	processor *ImageProcessor
+	wg        *sync.WaitGroup
+}
+
+func (w *Worker) Work(taskqueue chan Task) {
+
+	for task := range taskqueue {
+		fmt.Printf("Worker %d processing task %s\n", w.id, task.filename)
+
+	}
+
+}
+
+type WorkerPool struct {
+	workers   []*Worker
+	taskQueue chan Task
+	processor *ImageProcessor
+	wg        *sync.WaitGroup
 }
 
 type ImageProcessor struct {
@@ -117,7 +142,7 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ProcessHandler(w http.ResponseWriter, r *http.Request) {
-	go s.handleProcess(w, r)
+	s.handleProcess(w, r)
 
 }
 
@@ -136,7 +161,7 @@ func (s *Server) deleteImage(path string) error {
 
 }
 
-func (s *Server) deleteHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	queryParams := r.URL.Query()
 	file := queryParams.Get("file")

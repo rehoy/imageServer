@@ -3,10 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.uio.no/oysteere/myserver/server"
 	"net/http"
 	"os"
-	"github.uio.no/oysteere/myserver/server"
-
 )
 
 func main() {
@@ -25,6 +24,7 @@ func main() {
 
 	http.HandleFunc("/", s.Handler)
 	http.HandleFunc("/process", s.ProcessHandler)
+	http.HandleFunc("/delete", s.DeleteHandler)
 
 	fmt.Printf("Listening on port %s\n", port)
 	http.ListenAndServe(port, nil)
