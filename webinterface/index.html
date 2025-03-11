@@ -58,15 +58,26 @@
         url += `&name=${encodeURIComponent(name)}`;
     }
 
-            fetch(url)
-                .then(response => response.text())
-                .then(data => {
-                    alert(`Response: ${data}`);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                });
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text(); // Get raw text for closer inspection
+        })
+        .then(text => {
+            console.log('Raw Response:', text); // Log raw response data
+            try {
+                const data = JSON.parse(text); // Only parse if content seems valid JSON
+                console.log('Parsed JSON:', data);
+                alert(`Message: ${data.message}, Status: ${data.status}`);
+            } catch (error) {
+                console.error('Failed to parse JSON:', error);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
         });
     </script>
 

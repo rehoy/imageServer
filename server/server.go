@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -21,6 +22,11 @@ const (
 	GRAY   = "gray"
 	BLUR   = "blur"
 )
+
+type ResponseData struct {
+	Message string `json:"message"`
+	Status  string `json:"status"`
+}
 
 type Task struct {
 	filename string
@@ -137,7 +143,14 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 		s.logger.Printf("Could not encode. Suffix was not a supported type(%s)\n", suffix)
 	}
 
-	fmt.Fprintf(w, "did action %s to file: %s and saved it as %s", action, filename, outfile_name)
+	result := ResponseData{
+		Message: fmt.Sprintf("Processed file '%s' with action '%s'", outfile_name, action),
+		Status:  "success",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
 
 }
 
@@ -203,8 +216,6 @@ func (s *Server) SaveImg(img *image.RGBA, name string) {
 		fmt.Println("save jpeg")
 		jpeg.Encode(outfile, img, opts)
 	}
-
-	fmt.Println("saved img to %s", name)
 
 }
 
