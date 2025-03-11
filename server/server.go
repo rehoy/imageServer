@@ -8,12 +8,12 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"image/png"
+	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 )
 
 const (
@@ -28,49 +28,54 @@ type ResponseData struct {
 	Status  string `json:"status"`
 }
 
-type Task struct {
-	filename string
-	image    image.RGBA
-	action   string
-}
-
 type Server struct {
 	name         string
 	port         string
 	image_folder string
 	processor    ImageProcessor
 	logger       *log.Logger
-}
-
-type Worker struct {
-	id        int
-	taskChan  chan Task
-	processor *ImageProcessor
-	wg        *sync.WaitGroup
-}
-
-func (w *Worker) Work(taskqueue chan Task) {
-
-	for task := range taskqueue {
-		fmt.Printf("Worker %d processing task %s\n", w.id, task.filename)
-
-	}
-
-}
-
-type WorkerPool struct {
-	workers   []*Worker
-	taskQueue chan Task
-	processor *ImageProcessor
-	wg        *sync.WaitGroup
+	images       map[string]Image
 }
 
 type ImageProcessor struct {
 }
 
+type Image struct {
+	Filename string `json:"filename"`
+	Format   string `json:"format"`
+
+	Original bool     `json:"original"`
+	Filters  []string `json:"filters"`
+}
+
+func readImages(filepath string) map[string]Image {
+
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Fatalf("Could not open file %s: err: %v\n", filepath, err)
+	}
+	defer file.Close()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalf("could not read data, %v\n", err)
+	}
+
+	var images map[string]Image
+
+	err = json.Unmarshal(data, &images)
+	if err != nil {
+		log.Fatalf("Could not unmarshal JSON err: %v\n", err)
+	}
+	return images
+}
+
 func NewServer(name, port, image_folder string) *Server {
 	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	return &Server{name, port, image_folder, ImageProcessor{}, logger}
+
+	images := readImages("server/imginfo.json")
+
+	return &Server{name, port, image_folder, ImageProcessor{}, logger, images}
 }
 
 func (s *Server) Handler(w http.ResponseWriter, r *http.Request) {
@@ -102,15 +107,20 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "file does not exist on server", http.StatusNotFound)
 	}
 
+	filter := "none"
 	var processed *image.RGBA
 	switch action {
 	case INVERT:
+		filter = INVERT
 		processed = s.processor.GetInverted(*img)
 	case BLUR:
+		filter = BLUR
 		processed = s.processor.GetBlurred(*img)
 	case GRAY:
+		filter = GRAY
 		processed = s.processor.GetGray(*img)
 	case SOBEL:
+		filter = SOBEL
 		processed = s.processor.GetEdges(*img)
 	}
 
@@ -154,6 +164,48 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (s *Server) saveImg(outfile_name, format, filter, suffix string, processed *image.RGBA) error {
+
+	outfile, err := os.Create(s.image_folder + "/" + outfile_name)
+	if err != nil {
+		s.logger.Printf("could not open file: %s, err:%v\n", outfile_name, err)
+		return fmt.Errorf("could not create file %s", outfile_name)
+	}
+
+	defer outfile.Close()
+
+	switch suffix {
+	case "png":
+		png.Encode(outfile, processed)
+	case "jpg":
+		opts := jpeg.Options{Quality: 80}
+		jpeg.Encode(outfile, processed, &opts)
+	default:
+		s.logger.Printf("Could not encode. Suffix was not a supported type(%s)\n", suffix)
+		return fmt.Errorf("not of supported type: %s", suffix)
+	}
+
+	var image Image
+
+	image, ok := s.images[outfile_name]
+
+	if !ok {
+
+		image = Image{
+			Format:   suffix,
+			Original: false,
+			Filters:  []string{"none"},
+			Filename: outfile_name,
+		}
+	} else {
+		image.Filters = append(image.Filters, filter)
+	}
+
+	s.images[outfile_name] = image
+
+	return nil
+}
+
 func (s *Server) ProcessHandler(w http.ResponseWriter, r *http.Request) {
 	s.handleProcess(w, r)
 
@@ -192,31 +244,6 @@ func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "deleted %s", file)
-}
-
-func (s *Server) SaveImg(img *image.RGBA, name string) {
-
-	outfile, err := os.Create(name)
-	if err != nil {
-		fmt.Printf("Could not create file with name %s\n", name)
-		return
-	}
-
-	defer outfile.Close()
-
-	split_name := strings.Split(name, ".")
-	suffix := split_name[1]
-
-	switch suffix {
-	case "png":
-		fmt.Println("save png")
-		png.Encode(outfile, img)
-	case "jpg":
-		opts := &jpeg.Options{Quality: 80}
-		fmt.Println("save jpeg")
-		jpeg.Encode(outfile, img, opts)
-	}
-
 }
 
 func (p *ImageProcessor) InvertImg(img *image.RGBA) {

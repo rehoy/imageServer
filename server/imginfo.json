@@ -1,0 +1,25 @@
+{
+  "tinyApple.jpg":{
+    "filename":"tinyApple.jpg",
+    "format":"jpg",
+    "original":true,
+    "filters":[]
+
+  },
+
+  "green.png":{
+    "filename":"green.png",
+    "format":"png",
+    "original":true,
+    "filters":[]
+
+  },
+
+  "what.png":{
+    "filename":"what.png",
+    "format":"png",
+    "original":true,
+    "filters":[]
+
+  }
+}

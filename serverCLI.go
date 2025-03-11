@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// Construct the request URL
-	baseURL := "http://localhost:8080/"
+	baseURL := "http://localhost:8080/process"
 	requestURL, err := url.Parse(baseURL)
 	if err != nil {
 		fmt.Println("Error parsing URL:", err)
