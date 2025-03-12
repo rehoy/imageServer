@@ -519,6 +519,8 @@ func (s *Server) LoadImg(path string) (*image.RGBA, error) { // Open the image f
 	}
 	defer file.Close()
 
+	//her og der
+
 	// Decode the image
 	img, _, err := image.Decode(file)
 	if err != nil {
