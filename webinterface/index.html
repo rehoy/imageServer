@@ -9,8 +9,10 @@
   <body>
     <h1>Process Your Image</h1>
     <form id="processForm">
+
+    
       <label for="file">Image File</label>
-      <input type="text" name="file" id="file" required>
+      <input type="file" name="file" id="file" required>
 
       <label for="action">Action</label>
       <select id="action" name="action" required>
@@ -26,5 +28,8 @@
       <button type="submit">Process Image</button>
     </form>
     <script src="js/index.js"></script>
+
+    <h2>Image Preview</h2>
+    <img id="imagePreview" src="" alt="Image Preview" class="image-preview" style="max-width: 100%; display: none;">
   </body>
 </html>

@@ -28,6 +28,7 @@ label {
 }
 
 input[type="text"],
+input[type="file"],
 select {
     padding: 10px;
     border: 1px solid #ccc;
@@ -49,4 +50,12 @@ button {
 
 button:hover {
     background-color: #45a049;
+}
+
+.image-preview {
+    max-width: 100%;
+    display: none;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 20px;
 }

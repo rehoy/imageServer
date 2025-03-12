@@ -31,3 +31,10 @@ Saved file 'what.png' to 'images/sobelwhat.png'
 15:04:05	received request at /process with params:%!(EXTRA url.Values=map[action:[blur] file:[tinyApple.jpg] name:[hereand now]])
 15:04:05	received from url: /process?file=tinyApple.jpg&action=blur&name=hereand%20now
 15:04:05	Saved file 'tinyApple.jpg' to 'images/hereand now.jpg'
+15:04:05	received request at /process with params:%!(EXTRA url.Values=map[])
+15:04:05	received from url: /process
+15:04:05	missing filename() or or action()
+15:04:05	could not load image 
+
+15:04:05	
+	2025-03-12 15:23:29.0735687 +0100 CET m=+0.006251801

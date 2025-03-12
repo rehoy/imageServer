@@ -148,15 +148,12 @@ func (s *Server) Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
-	image_folder := "images"
 	queryParams := r.URL.Query()
 	filename := queryParams.Get("file")
 	action := queryParams.Get("action")
 	new_name := queryParams.Get("name")
 
-	//queryString := s.queryAsString(queryParams)
-
-	s.log(fmt.Sprintf("received request at /process with params:", queryParams))
+	s.log(fmt.Sprintf("received request at /process with params:%v", queryParams))
 	s.log(fmt.Sprintf("received from url: %v", r.URL))
 
 	if filename == "" || action == "" {
@@ -164,7 +161,7 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing filename or action in parameters", http.StatusBadRequest)
 	}
 
-	img, ok := s.LoadImg(image_folder + "/" + filename)
+	img, ok := s.LoadImg(s.image_folder + "/" + filename)
 	if ok != nil {
 		s.log(fmt.Sprintf("could not load image %s\n", filename))
 		http.Error(w, "file does not exist on server", http.StatusNotFound)
