@@ -40,6 +40,7 @@ type Server struct {
 	jsonMut      *sync.Mutex
 	loglineMut   *sync.Mutex
 	loglines     []string
+	logfile_name string
 }
 
 type ImageProcessor struct {
@@ -84,7 +85,7 @@ func NewServer(name, port, image_folder string) *Server {
 	var loglineMut sync.Mutex
 	var loglines []string
 
-	server := &Server{name, port, image_folder, ImageProcessor{}, logger, images, &jsonMut, &loglineMut, loglines}
+	server := &Server{name, port, image_folder, ImageProcessor{}, logger, images, &jsonMut, &loglineMut, loglines, "server/log.txt"}
 	server.startLogWriter()
 	return server
 }
@@ -95,10 +96,37 @@ func (s *Server) startLogWriter() {
 		for {
 			time.Sleep(10 * time.Second)
 
+			s.loglineMut.Lock()
+
+			if len(s.loglines) > 0 {
+				err := s.writeLogLines()
+
+				if err != nil {
+					s.log(fmt.Sprintf("could not write log lines: %v", err))
+				}
+			}
 			fmt.Println("Writing Log")
+			s.loglineMut.Unlock()
 
 		}
 	}()
+}
+
+func (s *Server) writeLogLines() error {
+
+	file, err := os.OpenFile(s.logfile_name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		return fmt.Errorf("could not find or create file: %s %v\n", s.logfile_name, err)
+	}
+	defer file.Close()
+
+	for _, logline := range s.loglines {
+		if _, err := file.WriteString(logline); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *Server) log(msg string) {
