@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 )
 
 const (
@@ -35,6 +36,7 @@ type Server struct {
 	processor    ImageProcessor
 	logger       *log.Logger
 	images       map[string]Image
+	mut          *sync.Mutex
 }
 
 type ImageProcessor struct {
@@ -75,7 +77,9 @@ func NewServer(name, port, image_folder string) *Server {
 
 	images := readImages("server/imginfo.json")
 
-	return &Server{name, port, image_folder, ImageProcessor{}, logger, images}
+	var mut sync.Mutex
+
+	return &Server{name, port, image_folder, ImageProcessor{}, logger, images, &mut}
 }
 
 func (s *Server) Handler(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +111,7 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "file does not exist on server", http.StatusNotFound)
 	}
 
-	filter := "none"
+	var filter string
 	var processed *image.RGBA
 	switch action {
 	case INVERT:
@@ -134,28 +138,23 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 		outfile_name = new_name + "." + suffix
 	}
 
-	s.logger.Printf("processing image: %s with action: %s and saving it to: %s\n", filename, action, outfile_name)
+	res := s.saveImg(outfile_name, filter, suffix, processed)
 
-	outfile, ok := os.Create(image_folder + "/" + outfile_name)
-	if ok != nil {
-		s.logger.Printf("could not save file: %s\n", outfile_name)
-		http.Error(w, "could not create file", http.StatusConflict)
-	}
-	defer outfile.Close()
+	var result ResponseData
 
-	switch suffix {
-	case "png":
-		png.Encode(outfile, processed)
-	case "jpg":
-		opts := jpeg.Options{Quality: 80}
-		jpeg.Encode(outfile, processed, &opts)
-	default:
-		s.logger.Printf("Could not encode. Suffix was not a supported type(%s)\n", suffix)
-	}
+	if res != nil {
+		result = ResponseData{
+			Message: fmt.Sprintf("Could not process and save file '%s' with action '%s'\n", outfile_name, action),
+			Status:  "failure",
+		}
+		s.logger.Printf("Couldn not save file '%s'\n", outfile_name)
+	} else {
 
-	result := ResponseData{
-		Message: fmt.Sprintf("Processed file '%s' with action '%s'", outfile_name, action),
-		Status:  "success",
+		result = ResponseData{
+			Message: fmt.Sprintf("Processed file '%s' with action '%s'", outfile_name, action),
+			Status:  "success",
+		}
+		s.logger.Printf("Saved file '%s' to '%s'", filename, s.image_folder+"/"+outfile_name)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -164,7 +163,7 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (s *Server) saveImg(outfile_name, format, filter, suffix string, processed *image.RGBA) error {
+func (s *Server) saveImg(outfile_name, filter, suffix string, processed *image.RGBA) error {
 
 	outfile, err := os.Create(s.image_folder + "/" + outfile_name)
 	if err != nil {
@@ -194,7 +193,7 @@ func (s *Server) saveImg(outfile_name, format, filter, suffix string, processed 
 		image = Image{
 			Format:   suffix,
 			Original: false,
-			Filters:  []string{"none"},
+			Filters:  []string{filter},
 			Filename: outfile_name,
 		}
 	} else {
@@ -203,7 +202,39 @@ func (s *Server) saveImg(outfile_name, format, filter, suffix string, processed 
 
 	s.images[outfile_name] = image
 
+	go s.writeJSON()
+
 	return nil
+}
+
+func (s *Server) writeJSON() error {
+
+	images := s.images
+
+	jsonData, err := json.MarshalIndent(images, "", "  ")
+	if err != nil {
+		s.logger.Printf("error marshaling images")
+		return fmt.Errorf("error marshaling images (%v)", err)
+
+	}
+
+	s.mut.Lock()
+	file, err := os.Create("server/imginfo.json")
+	if err != nil {
+		s.logger.Printf("error opening imginfo.json")
+		return fmt.Errorf("error opening imginfo.json")
+	}
+	defer file.Close()
+
+	_, err = file.Write(jsonData)
+	if err != nil {
+		s.logger.Printf("error wrting JSON to file: imginfo.json")
+		return fmt.Errorf("error writing JSON to file: %w", err)
+	}
+	s.mut.Unlock()
+
+	return nil
+
 }
 
 func (s *Server) ProcessHandler(w http.ResponseWriter, r *http.Request) {

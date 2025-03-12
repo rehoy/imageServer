@@ -1,25 +1,29 @@
 {
-  "tinyApple.jpg":{
-    "filename":"tinyApple.jpg",
-    "format":"jpg",
-    "original":true,
-    "filters":[]
-
+  "green.png": {
+    "filename": "green.png",
+    "format": "png",
+    "original": true,
+    "filters": []
   },
-
-  "green.png":{
-    "filename":"green.png",
-    "format":"png",
-    "original":true,
-    "filters":[]
-
+  "invertwhat.png": {
+    "filename": "invertwhat.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "none",
+      "invert"
+    ]
   },
-
-  "what.png":{
-    "filename":"what.png",
-    "format":"png",
-    "original":true,
-    "filters":[]
-
+  "tinyApple.jpg": {
+    "filename": "tinyApple.jpg",
+    "format": "jpg",
+    "original": true,
+    "filters": []
+  },
+  "what.png": {
+    "filename": "what.png",
+    "format": "png",
+    "original": true,
+    "filters": []
   }
 }

@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Command-line flags
-	command := flag.String("command", "", "delete or process")
+	//command := flag.String("command", "", "delete or process")
 	fileName := flag.String("file", "", "Name of the image file to process")
 	action := flag.String("action", "", "Action to perform on the image (e.g., invert)")
 	name := flag.String("name", "", "name to save the processed as")
