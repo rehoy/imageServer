@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 const (
@@ -36,7 +37,9 @@ type Server struct {
 	processor    ImageProcessor
 	logger       *log.Logger
 	images       map[string]Image
-	mut          *sync.Mutex
+	jsonMut      *sync.Mutex
+	loglineMut   *sync.Mutex
+	loglines     []string
 }
 
 type ImageProcessor struct {
@@ -77,14 +80,36 @@ func NewServer(name, port, image_folder string) *Server {
 
 	images := readImages("server/imginfo.json")
 
-	var mut sync.Mutex
+	var jsonMut sync.Mutex
+	var loglineMut sync.Mutex
+	var loglines []string
 
-	return &Server{name, port, image_folder, ImageProcessor{}, logger, images, &mut}
+	server := &Server{name, port, image_folder, ImageProcessor{}, logger, images, &jsonMut, &loglineMut, loglines}
+	server.startLogWriter()
+	return server
+}
+
+func (s *Server) startLogWriter() {
+
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+
+			fmt.Println("Writing Log")
+
+		}
+	}()
+}
+
+func (s *Server) log(msg string) {
+	s.loglines = append(s.loglines, msg)
+	s.logger.Printf(msg)
 }
 
 func (s *Server) Handler(w http.ResponseWriter, r *http.Request) {
 	go func() {
-		s.logger.Println("Received request at /")
+		msg := "Received request at /\n"
+		s.log(msg)
 		w.Write([]byte("Hello, World!"))
 	}()
 }
@@ -218,7 +243,7 @@ func (s *Server) writeJSON() error {
 
 	}
 
-	s.mut.Lock()
+	s.jsonMut.Lock()
 	file, err := os.Create("server/imginfo.json")
 	if err != nil {
 		s.logger.Printf("error opening imginfo.json")
@@ -231,7 +256,7 @@ func (s *Server) writeJSON() error {
 		s.logger.Printf("error wrting JSON to file: imginfo.json")
 		return fmt.Errorf("error writing JSON to file: %w", err)
 	}
-	s.mut.Unlock()
+	s.jsonMut.Unlock()
 
 	return nil
 
