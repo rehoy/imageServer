@@ -42,4 +42,7 @@ func main() {
 
 	fmt.Println(len(images))
 
+	
+
 }
+

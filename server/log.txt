@@ -1,0 +1,33 @@
+
+	2025-03-12 13:39:19.2217587 +0100 CET m=+0.007035601
+received request at /process with params:%!(EXTRA url.Values=map[action:[sobel] file:[what.png] name:[]])
+received from url: /process?action=sobel&file=what.png&name=
+Saved file 'what.png' to 'images/sobelwhat.png'
+received request at /process with params:%!(EXTRA url.Values=map[action:[sobel] file:[what.png] name:[]])
+received from url: /process?action=sobel&file=what.png&name=
+Saved file 'what.png' to 'images/sobelwhat.png'
+15:04:05	
+	2025-03-12 13:42:42.4526074 +0100 CET m=+0.007526001
+15:04:05	received request at /process with params:%!(EXTRA url.Values=map[action:[gray] file:[what.png] name:[]])
+15:04:05	received from url: /process?action=gray&file=what.png&name=
+15:04:05	Saved file 'what.png' to 'images/graywhat.png'
+15:04:05	received request at /process with params:%!(EXTRA url.Values=map[action:[gray] file:[what.png] name:[piss]])
+15:04:05	received from url: /process?action=gray&file=what.png&name=piss
+15:04:05	Saved file 'what.png' to 'images/piss.png'
+15:04:05	received request at /process with params:%!(EXTRA url.Values=map[action:[invert] file:[what.png] name:[shit]])
+15:04:05	received from url: /process?action=invert&file=what.png&name=shit
+15:04:05	Saved file 'what.png' to 'images/shit.png'
+15:04:05	received request at /process with params:%!(EXTRA url.Values=map[action:[blur] file:[tinyApple.jpg] name:[appledbe]])
+15:04:05	received from url: /process?file=tinyApple.jpg&action=blur&name=appledbe
+15:04:05	Saved file 'tinyApple.jpg' to 'images/appledbe.jpg'
+15:04:05	
+	2025-03-12 14:59:05.8549595 +0100 CET m=+0.007368801
+15:04:05	received request at /process with params:%!(EXTRA url.Values=map[action:[blur] file:[tinyApple.jpg] name:[here]])
+15:04:05	received from url: /process?file=tinyApple.jpg&action=blur&name=here
+15:04:05	Saved file 'tinyApple.jpg' to 'images/here.jpg'
+15:04:05	received request at /process with params:%!(EXTRA url.Values=map[action:[blur] file:[tinyApple.jpg] name:[hereand now]])
+15:04:05	received from url: /process?file=tinyApple.jpg&action=blur&name=hereand%20now
+15:04:05	Saved file 'tinyApple.jpg' to 'images/hereand now.jpg'
+15:04:05	received request at /process with params:%!(EXTRA url.Values=map[action:[blur] file:[tinyApple.jpg] name:[hereand now]])
+15:04:05	received from url: /process?file=tinyApple.jpg&action=blur&name=hereand%20now
+15:04:05	Saved file 'tinyApple.jpg' to 'images/hereand now.jpg'

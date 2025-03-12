@@ -93,6 +93,8 @@ func NewServer(name, port, image_folder string) *Server {
 func (s *Server) startLogWriter() {
 
 	go func() {
+		//the new line is meant to be there
+		s.log(fmt.Sprintf("\n\t%v", time.Now()))
 		for {
 			time.Sleep(10 * time.Second)
 
@@ -105,7 +107,6 @@ func (s *Server) startLogWriter() {
 					s.log(fmt.Sprintf("could not write log lines: %v", err))
 				}
 			}
-			fmt.Println("Writing Log")
 			s.loglineMut.Unlock()
 
 		}
@@ -121,10 +122,11 @@ func (s *Server) writeLogLines() error {
 	defer file.Close()
 
 	for _, logline := range s.loglines {
-		if _, err := file.WriteString(logline); err != nil {
+		if _, err := file.WriteString(time.TimeOnly + "\t" + logline); err != nil {
 			return err
 		}
 	}
+	s.loglines = []string{}
 
 	return nil
 }
@@ -133,7 +135,7 @@ func (s *Server) log(msg string) {
 	s.logger.Printf("%s\n", msg)
 
 	s.loglineMut.Lock()
-	s.loglines = append(s.loglines, msg)
+	s.loglines = append(s.loglines, msg+"\n")
 	s.loglineMut.Unlock()
 }
 

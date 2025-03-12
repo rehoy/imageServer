@@ -1,9 +1,42 @@
 {
+  "appledbe.jpg": {
+    "filename": "appledbe.jpg",
+    "format": "jpg",
+    "original": false,
+    "filters": [
+      "blur"
+    ]
+  },
+  "graywhat.png": {
+    "filename": "graywhat.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "gray"
+    ]
+  },
   "green.png": {
     "filename": "green.png",
     "format": "png",
     "original": true,
     "filters": []
+  },
+  "here.jpg": {
+    "filename": "here.jpg",
+    "format": "jpg",
+    "original": false,
+    "filters": [
+      "blur"
+    ]
+  },
+  "hereand now.jpg": {
+    "filename": "hereand now.jpg",
+    "format": "jpg",
+    "original": false,
+    "filters": [
+      "blur",
+      "blur"
+    ]
   },
   "invertwhat.png": {
     "filename": "invertwhat.png",
@@ -11,7 +44,35 @@
     "original": false,
     "filters": [
       "none",
+      "invert",
+      "invert",
       "invert"
+    ]
+  },
+  "piss.png": {
+    "filename": "piss.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "gray"
+    ]
+  },
+  "shit.png": {
+    "filename": "shit.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "invert"
+    ]
+  },
+  "sobelwhat.png": {
+    "filename": "sobelwhat.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel",
+      "sobel",
+      "sobel"
     ]
   },
   "tinyApple.jpg": {
