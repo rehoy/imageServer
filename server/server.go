@@ -102,13 +102,16 @@ func (s *Server) startLogWriter() {
 }
 
 func (s *Server) log(msg string) {
+	s.logger.Printf("%s\n", msg)
+
+	s.loglineMut.Lock()
 	s.loglines = append(s.loglines, msg)
-	s.logger.Printf(msg)
+	s.loglineMut.Unlock()
 }
 
 func (s *Server) Handler(w http.ResponseWriter, r *http.Request) {
 	go func() {
-		msg := "Received request at /\n"
+		msg := "Received request at /"
 		s.log(msg)
 		w.Write([]byte("Hello, World!"))
 	}()
@@ -123,16 +126,17 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 
 	//queryString := s.queryAsString(queryParams)
 
-	s.logger.Println("received request at /process with params:", queryParams)
+	s.log(fmt.Sprintf("received request at /process with params:", queryParams))
+	s.log(fmt.Sprintf("received from url: %v", r.URL))
 
 	if filename == "" || action == "" {
-		s.logger.Printf("missing filename(%s) or or action(%s)\n", filename, action)
+		s.log(fmt.Sprintf("missing filename(%s) or or action(%s)", filename, action))
 		http.Error(w, "missing filename or action in parameters", http.StatusBadRequest)
 	}
 
 	img, ok := s.LoadImg(image_folder + "/" + filename)
 	if ok != nil {
-		s.logger.Printf("could not load image %s\n", filename)
+		s.log(fmt.Sprintf("could not load image %s\n", filename))
 		http.Error(w, "file does not exist on server", http.StatusNotFound)
 	}
 
@@ -172,14 +176,14 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Could not process and save file '%s' with action '%s'\n", outfile_name, action),
 			Status:  "failure",
 		}
-		s.logger.Printf("Couldn not save file '%s'\n", outfile_name)
+		s.log(fmt.Sprintf("Couldn not save file '%s'", outfile_name))
 	} else {
 
 		result = ResponseData{
 			Message: fmt.Sprintf("Processed file '%s' with action '%s'", outfile_name, action),
 			Status:  "success",
 		}
-		s.logger.Printf("Saved file '%s' to '%s'", filename, s.image_folder+"/"+outfile_name)
+		s.log(fmt.Sprintf("Saved file '%s' to '%s'", filename, s.image_folder+"/"+outfile_name))
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -192,7 +196,7 @@ func (s *Server) saveImg(outfile_name, filter, suffix string, processed *image.R
 
 	outfile, err := os.Create(s.image_folder + "/" + outfile_name)
 	if err != nil {
-		s.logger.Printf("could not open file: %s, err:%v\n", outfile_name, err)
+		s.log(fmt.Sprint("could not open file: %s, err:%v", outfile_name, err))
 		return fmt.Errorf("could not create file %s", outfile_name)
 	}
 
@@ -205,7 +209,7 @@ func (s *Server) saveImg(outfile_name, filter, suffix string, processed *image.R
 		opts := jpeg.Options{Quality: 80}
 		jpeg.Encode(outfile, processed, &opts)
 	default:
-		s.logger.Printf("Could not encode. Suffix was not a supported type(%s)\n", suffix)
+		s.log(fmt.Sprintf("Could not encode. Suffix was not a supported type(%s)\n", suffix))
 		return fmt.Errorf("not of supported type: %s", suffix)
 	}
 
@@ -238,7 +242,7 @@ func (s *Server) writeJSON() error {
 
 	jsonData, err := json.MarshalIndent(images, "", "  ")
 	if err != nil {
-		s.logger.Printf("error marshaling images")
+		s.log("error marshaling images")
 		return fmt.Errorf("error marshaling images (%v)", err)
 
 	}
@@ -246,14 +250,14 @@ func (s *Server) writeJSON() error {
 	s.jsonMut.Lock()
 	file, err := os.Create("server/imginfo.json")
 	if err != nil {
-		s.logger.Printf("error opening imginfo.json")
+		s.log("error opening imginfo.json")
 		return fmt.Errorf("error opening imginfo.json")
 	}
 	defer file.Close()
 
 	_, err = file.Write(jsonData)
 	if err != nil {
-		s.logger.Printf("error wrting JSON to file: imginfo.json")
+		s.log("Error writing JSON to file: imginfo.json")
 		return fmt.Errorf("error writing JSON to file: %w", err)
 	}
 	s.jsonMut.Unlock()
@@ -273,10 +277,10 @@ func (s *Server) deleteImage(path string) error {
 
 	err := os.Remove(filepath)
 	if err != nil {
-		s.logger.Printf("could not delete image: %s\n", path)
+		s.log(fmt.Sprintf("could not delete image: %s", path))
 		return fmt.Errorf("failed to delete file %s: %v ", path, err)
 	}
-	s.logger.Printf("deleted image: %s from folder %s\n", path, s.image_folder)
+	s.log(fmt.Sprintf("deleted image: %s from folder %s\n", path, s.image_folder))
 
 	return nil
 
