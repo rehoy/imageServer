@@ -38,3 +38,127 @@ Saved file 'what.png' to 'images/sobelwhat.png'
 
 15:04:05	
 	2025-03-12 15:23:29.0735687 +0100 CET m=+0.006251801
+15:04:05	
+	2025-03-12 18:31:20.3924681 +0100 CET m=+0.074029001
+15:04:05	could not decode image: image: unknown format
+15:04:05	received from url: /process
+15:04:05	
+	2025-03-12 18:48:48.1894374 +0100 CET m=+0.006825701
+15:04:05	could not decode image: image: unknown format
+15:04:05	
+	2025-03-12 18:57:50.0093696 +0100 CET m=+0.007715701
+15:04:05	could not decode image: image: unknown format
+15:04:05	could not decode image: image: unknown format
+15:04:05	
+	2025-03-12 19:04:54.2102817 +0100 CET m=+0.007541401
+15:04:05	could not decode image: image: unknown format
+15:04:05	
+	2025-03-12 19:07:10.4165748 +0100 CET m=+0.007288001
+15:04:05	could not decode image: image: unknown format
+15:04:05	
+2025-03-13 09:54:30.8989892 +0100 CET m=+0.030099401
+15:04:05	could not decode image: image: unknown format
+15:04:05	
+	2025-03-13 10:00:58.1119263 +0100 CET m=+0.007752801
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	
+	2025-03-13 10:32:17.8103088 +0100 CET m=+0.007122201
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	
+	2025-03-13 10:35:25.0359044 +0100 CET m=+0.006690401
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	
+	2025-03-13 10:41:12.4846387 +0100 CET m=+0.008883001
+15:04:05	au.png
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	
+	2025-03-13 10:43:49.712242 +0100 CET m=+0.007805701
+15:04:05	
+	2025-03-13 10:46:00.416304 +0100 CET m=+0.006941001
+15:04:05	au.png
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	
+	2025-03-13 10:47:35.4818399 +0100 CET m=+0.008300101
+15:04:05	au.png
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	
+	2025-03-13 10:48:33.940154 +0100 CET m=+0.010476301
+15:04:05	png is what this is 
+15:04:05	au.png
+15:04:05	received file: au.png, action: blur
+15:04:05	could not decode image: image: unknown format, format: 
+15:04:05	
+	2025-03-13 10:50:49.4748609 +0100 CET m=+0.006764001
+15:04:05	png is what this is 
+15:04:05	au.png
+15:04:05	received file: au.png, action: blur
+15:04:05	received from url: /process
+15:04:05	Saved file 'au.png' to 'images/blurred.png'
+15:04:05	
+	2025-03-13 10:53:18.5348213 +0100 CET m=+0.025426001
+15:04:05	au.png
+15:04:05	received file: au.png, action: invert
+15:04:05	received from url: /process
+15:04:05	Saved file 'au.png' to 'images/blurred.png'
+15:04:05	beby.jpg
+15:04:05	received file: beby.jpg, action: sobel
+15:04:05	received from url: /process
+15:04:05	Could not encode. Suffix was not a supported type(jpeg)
+
+15:04:05	Couldn not save file 'elbeb.jpeg'
+15:04:05	beby.jpg
+15:04:05	received file: beby.jpg, action: invert
+15:04:05	received from url: /process
+15:04:05	Could not encode. Suffix was not a supported type(jpeg)
+
+15:04:05	Couldn not save file 'elbeb.jpeg'
+15:04:05	
+	2025-03-13 10:55:20.3030893 +0100 CET m=+0.011988401
+15:04:05	beby.jpg
+15:04:05	received file: beby.jpg, action: invert
+15:04:05	received from url: /process
+15:04:05	Saved file 'beby.jpg' to 'images/elbeb.jpeg'
+15:04:05	beby.jpg
+15:04:05	received file: beby.jpg, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'beby.jpg' to 'images/sobelby.jpeg'
+15:04:05	beby.jpg
+15:04:05	received file: beby.jpg, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'beby.jpg' to 'images/sobelby.jpeg'
+15:04:05	beby.jpg
+15:04:05	received file: beby.jpg, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'beby.jpg' to 'images/sobelby.jpeg'
+15:04:05	beby.jpg
+15:04:05	received file: beby.jpg, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'beby.jpg' to 'images/sobelby.jpeg'
+15:04:05	beby.jpg
+15:04:05	received file: beby.jpg, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'beby.jpg' to 'images/sobelby.jpeg'
+15:04:05	IMG_20210224_212832.jpg
+15:04:05	received file: IMG_20210224_212832.jpg, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'IMG_20210224_212832.jpg' to 'images/sobelby.jpeg'
+15:04:05	IMG_20210224_212832.jpg
+15:04:05	received file: IMG_20210224_212832.jpg, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'IMG_20210224_212832.jpg' to 'images/sobelby.jpeg'
+15:04:05	Capture.PNG
+15:04:05	received file: Capture.PNG, action: gray
+15:04:05	received from url: /process
+15:04:05	Saved file 'Capture.PNG' to 'images/capturecard.png'

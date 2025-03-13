@@ -8,12 +8,11 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"image/png"
-	"io/ioutil"
+	"io"
 	"log"
 	"math"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 )
@@ -62,7 +61,7 @@ func readImages(filepath string) map[string]Image {
 	}
 	defer file.Close()
 
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
 		log.Fatalf("could not read data, %v\n", err)
 	}
@@ -117,7 +116,7 @@ func (s *Server) writeLogLines() error {
 
 	file, err := os.OpenFile(s.logfile_name, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		return fmt.Errorf("could not find or create file: %s %v\n", s.logfile_name, err)
+		return fmt.Errorf("could not find or create file: %s %v", s.logfile_name, err)
 	}
 	defer file.Close()
 
@@ -148,53 +147,77 @@ func (s *Server) Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
-	queryParams := r.URL.Query()
-	filename := queryParams.Get("file")
-	action := queryParams.Get("action")
-	new_name := queryParams.Get("name")
 
-	s.log(fmt.Sprintf("received request at /process with params:%v", queryParams))
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "Error parsing form", http.StatusBadRequest)
+		s.log(fmt.Sprintf("could not parse form: %v", err))
+	}
+
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Error retrieving the ile", http.StatusBadRequest)
+		s.log(fmt.Sprintf("could not retrieve file: %v", err))
+	}
+	defer file.Close()
+
+	action := r.FormValue("action")
+	newName := r.FormValue("name")
+
+	if action == "" {
+		http.Error(w, "Missing action paramter", http.StatusBadRequest)
+		s.log("missing action parameter")
+	}
+
+	tempFile, e := os.CreateTemp("", "upload-*")
+
+	
+	if e != nil {
+		http.Error(w, "could not create temp file", http.StatusInternalServerError)
+		s.log(fmt.Sprintf("could not create temp file: %v", err))
+	}
+	defer tempFile.Close()
+
+	fileBytes, err := io.ReadAll(file)
+	s.log(handler.Filename)
+	if err != nil {
+		http.Error(w, "could not read file", http.StatusInternalServerError)
+		s.log(fmt.Sprintf("could not read file: %v", err))
+	}
+
+	tempFile.Write(fileBytes)
+	tempFile.Seek(0, 0)
+
+	s.log(fmt.Sprintf("received file: %s, action: %s", handler.Filename, action))
+	img, format, err := image.Decode(tempFile)
+	if err != nil {
+		http.Error(w, "could not decode image", http.StatusInternalServerError)
+		s.log(fmt.Sprintf("could not decode image: %v, format: %v", err, format))
+	}
+	fmt.Println("Howdy how are ya?",format)
+	rgbaImg := s.imageToRGBA(img)
+
 	s.log(fmt.Sprintf("received from url: %v", r.URL))
 
-	if filename == "" || action == "" {
-		s.log(fmt.Sprintf("missing filename(%s) or or action(%s)", filename, action))
-		http.Error(w, "missing filename or action in parameters", http.StatusBadRequest)
-	}
-
-	img, ok := s.LoadImg(s.image_folder + "/" + filename)
-	if ok != nil {
-		s.log(fmt.Sprintf("could not load image %s\n", filename))
-		http.Error(w, "file does not exist on server", http.StatusNotFound)
-	}
-
-	var filter string
 	var processed *image.RGBA
 	switch action {
 	case INVERT:
-		filter = INVERT
-		processed = s.processor.GetInverted(*img)
+		processed = s.processor.GetInverted(*rgbaImg)
 	case BLUR:
-		filter = BLUR
-		processed = s.processor.GetBlurred(*img)
+		processed = s.processor.GetBlurred(*rgbaImg)
 	case GRAY:
-		filter = GRAY
-		processed = s.processor.GetGray(*img)
+		processed = s.processor.GetGray(*rgbaImg)
 	case SOBEL:
-		filter = SOBEL
-		processed = s.processor.GetEdges(*img)
+		processed = s.processor.GetEdges(*rgbaImg)
 	}
-
-	split_filename := strings.Split(filename, ".")
-	suffix := split_filename[1]
 
 	var outfile_name string
-	if new_name == "" {
-		outfile_name = action + filename
+	if newName != "" {
+		outfile_name = newName + "." + format
 	} else {
-		outfile_name = new_name + "." + suffix
+		outfile_name = action + "_" + newName + "." + format
 	}
 
-	res := s.saveImg(outfile_name, filter, suffix, processed)
+	res := s.saveImg(outfile_name, action, format, processed)
 
 	var result ResponseData
 
@@ -210,7 +233,7 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 			Message: fmt.Sprintf("Processed file '%s' with action '%s'", outfile_name, action),
 			Status:  "success",
 		}
-		s.log(fmt.Sprintf("Saved file '%s' to '%s'", filename, s.image_folder+"/"+outfile_name))
+		s.log(fmt.Sprintf("Saved file '%s' to '%s'", handler.Filename, s.image_folder+"/"+outfile_name))
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -219,20 +242,28 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (s *Server) imageToRGBA(img image.Image) *image.RGBA {
+
+	bounds := img.Bounds()
+	rgba := image.NewRGBA(bounds)
+	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+
+	return rgba
+}
+
 func (s *Server) saveImg(outfile_name, filter, suffix string, processed *image.RGBA) error {
 
 	outfile, err := os.Create(s.image_folder + "/" + outfile_name)
 	if err != nil {
-		s.log(fmt.Sprint("could not open file: %s, err:%v", outfile_name, err))
+		s.log(fmt.Sprintf("could not open file: %s, err:%v", outfile_name, err))
 		return fmt.Errorf("could not create file %s", outfile_name)
 	}
-
 	defer outfile.Close()
 
 	switch suffix {
 	case "png":
 		png.Encode(outfile, processed)
-	case "jpg":
+	case "jpeg":
 		opts := jpeg.Options{Quality: 80}
 		jpeg.Encode(outfile, processed, &opts)
 	default:
@@ -508,15 +539,13 @@ func clamp(value, min, max int) int {
 
 func (s *Server) LoadImg(path string) (*image.RGBA, error) { // Open the image file
 	file, err := os.Open(path) // Replace with your image file name
-	image.RegisterFormat("", "\x89PNG\r\n\x1a\n", png.Decode, png.DecodeConfig)
-	image.RegisterFormat("jpeg", "\xff\xd8", jpeg.Decode, jpeg.DecodeConfig)
+
 	if err != nil {
 		fmt.Println("Error opening file:", err)
+		s.log(fmt.Sprintf("could not open file: %s, %v", path, err))
 		return nil, err
 	}
 	defer file.Close()
-
-	//her og der
 
 	// Decode the image
 	img, _, err := image.Decode(file)
@@ -525,13 +554,5 @@ func (s *Server) LoadImg(path string) (*image.RGBA, error) { // Open the image f
 		return nil, err
 	}
 
-	// Output image format
-
-	// Get image dimensions
-	bounds := img.Bounds()
-
-	new_RGBA := image.NewRGBA(bounds)
-	draw.Draw(new_RGBA, new_RGBA.Bounds(), img, image.Point{0, 0}, draw.Src)
-
-	return new_RGBA, nil
+	return s.imageToRGBA(img), nil
 }

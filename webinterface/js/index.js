@@ -6,7 +6,7 @@ document.getElementById('processForm').addEventListener('submit', function (even
     const name = document.getElementById('name').value;
 
     if (fileInput.isDefaultNamespace.length === 0){
-        alert('Please select a ile.')
+        alert('Please select a file.')
         return;
     }
     const file = fileInput.files[0];
@@ -17,6 +17,8 @@ document.getElementById('processForm').addEventListener('submit', function (even
         formData.append('name', name)
     }
 
+    const imageResult = document.getElementById('imageResult');
+    imageResult.textContent = "Processing image...";
 
     let url = `http://localhost:8080/process?file=${encodeURIComponent(file)}&action=${encodeURIComponent(action)}`;
     if (name) {
@@ -36,9 +38,11 @@ document.getElementById('processForm').addEventListener('submit', function (even
     .then(data => {
         console.log('Response:', data);
         alert(`Message: ${data.message}, Status: ${data.status}`);
+        imageResult.textContent = `Message: ${data.message}, Status: ${data.status}`;
     })
     .catch(error => {
         console.error('Fetch error:', error);
+        alert('An error occurred, please try again later.');
     });
 
     

@@ -7,6 +7,31 @@
       "blur"
     ]
   },
+  "blurred.png": {
+    "filename": "blurred.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "blur",
+      "invert"
+    ]
+  },
+  "capturecard.png": {
+    "filename": "capturecard.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "gray"
+    ]
+  },
+  "elbeb.jpeg": {
+    "filename": "elbeb.jpeg",
+    "format": "jpeg",
+    "original": false,
+    "filters": [
+      "invert"
+    ]
+  },
   "graywhat.png": {
     "filename": "graywhat.png",
     "format": "png",
@@ -63,6 +88,20 @@
     "original": false,
     "filters": [
       "invert"
+    ]
+  },
+  "sobelby.jpeg": {
+    "filename": "sobelby.jpeg",
+    "format": "jpeg",
+    "original": false,
+    "filters": [
+      "sobel",
+      "sobel",
+      "sobel",
+      "sobel",
+      "sobel",
+      "sobel",
+      "sobel"
     ]
   },
   "sobelwhat.png": {
