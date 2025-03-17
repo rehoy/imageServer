@@ -11,7 +11,9 @@ import (
 	"io"
 	"log"
 	"math"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"os"
 	"sync"
 	"time"
@@ -236,9 +238,41 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 		s.log(fmt.Sprintf("Saved file '%s' to '%s'", handler.Filename, s.image_folder+"/"+outfile_name))
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(result)
+	s.sendResponse(w, result, processed, format)
+	s.log("sent response")
+}
+
+func (s *Server) sendResponse(w http.ResponseWriter, result ResponseData, processed *image.RGBA, format string) {
+	writer := multipart.NewWriter(w)
+	defer writer.Close()
+
+	realBoundary := writer.Boundary()
+	w.Header().Set("Content-Type", "multipart/mixed; boundary="+realBoundary)
+
+	jsonPart, err := writer.CreatePart(textproto.MIMEHeader{"Content-Type": {"application/json"}})
+	if err != nil {
+		http.Error(w, "Error creating JSON part", http.StatusInternalServerError)
+		s.log(fmt.Sprintf("could not create JSON part: %v", err))
+	}
+	json.NewEncoder(jsonPart).Encode(result)
+
+	s.log(format)
+	imgPart, err := writer.CreatePart(textproto.MIMEHeader{"Content-Type": {"image/" + format}})
+	if err != nil {
+		http.Error(w, "Error creating image part", http.StatusInternalServerError)
+		s.log(fmt.Sprintf("could not create image part: %v", err))
+	}
+
+	switch format {
+	case "png":
+		png.Encode(imgPart, processed)
+	case "jpeg":
+		opts := jpeg.Options{Quality: 80}
+		jpeg.Encode(imgPart, processed, &opts)
+	default:
+		http.Error(w, "Could not encode image", http.StatusInternalServerError)
+		s.log(fmt.Sprintf("Could not encode image in response: %s", format))
+	}
 
 }
 

@@ -162,3 +162,92 @@ Saved file 'what.png' to 'images/sobelwhat.png'
 15:04:05	received file: Capture.PNG, action: gray
 15:04:05	received from url: /process
 15:04:05	Saved file 'Capture.PNG' to 'images/capturecard.png'
+15:04:05	au.png
+15:04:05	received file: au.png, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'au.png' to 'images/Rehaug.png'
+15:04:05	au.png
+15:04:05	received file: au.png, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'au.png' to 'images/reahug.png'
+15:04:05	au.png
+15:04:05	received file: au.png, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'au.png' to 'images/reag.png'
+15:04:05	prototype-quiz.png
+15:04:05	received file: prototype-quiz.png, action: invert
+15:04:05	received from url: /process
+15:04:05	Saved file 'prototype-quiz.png' to 'images/reag.png'
+15:04:05	kitty.png
+15:04:05	received file: kitty.png, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'kitty.png' to 'images/rea.png'
+15:04:05	
+	2025-03-13 13:18:18.2144586 +0100 CET m=+0.007747301
+15:04:05	joakim.png
+15:04:05	received file: joakim.png, action: invert
+15:04:05	received from url: /process
+15:04:05	Saved file 'joakim.png' to 'images/Joachim.png'
+15:04:05	sent response
+15:04:05	knif.png
+15:04:05	received file: knif.png, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'knif.png' to 'images/knif.png'
+15:04:05	sent response
+15:04:05	knif.png
+15:04:05	received file: knif.png, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'knif.png' to 'images/knifeee.png'
+15:04:05	sent response
+15:04:05	knif.png
+15:04:05	received file: knif.png, action: invert
+15:04:05	received from url: /process
+15:04:05	Saved file 'knif.png' to 'images/invert_.png'
+15:04:05	sent response
+15:04:05	knif.png
+15:04:05	received file: knif.png, action: blur
+15:04:05	received from url: /process
+15:04:05	Saved file 'knif.png' to 'images/knifefe.png'
+15:04:05	sent response
+15:04:05	Skjermbilde 2023-03-28 171222.png
+15:04:05	received file: Skjermbilde 2023-03-28 171222.png, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'Skjermbilde 2023-03-28 171222.png' to 'images/babab.png'
+15:04:05	sent response
+15:04:05	Skjermbilde 2023-04-25 123234.png
+15:04:05	received file: Skjermbilde 2023-04-25 123234.png, action: sobel
+15:04:05	received from url: /process
+15:04:05	Saved file 'Skjermbilde 2023-04-25 123234.png' to 'images/sobelPair.png'
+15:04:05	sent response
+15:04:05	
+	2025-03-13 13:52:21.7152243 +0100 CET m=+0.007187601
+15:04:05	Skjermbilde 2023-04-14 205307.png
+15:04:05	received file: Skjermbilde 2023-04-14 205307.png, action: blur
+15:04:05	received from url: /process
+15:04:05	Saved file 'Skjermbilde 2023-04-14 205307.png' to 'images/arrows.png'
+15:04:05	png
+15:04:05	sent response
+15:04:05	
+	2025-03-13 13:57:35.833056 +0100 CET m=+0.010090901
+15:04:05	joakim.png
+15:04:05	received file: joakim.png, action: invert
+15:04:05	received from url: /process
+15:04:05	Saved file 'joakim.png' to 'images/jokko.png'
+15:04:05	png
+15:04:05	sent response
+15:04:05	
+	2025-03-13 14:05:40.4200612 +0100 CET m=+0.010366601
+15:04:05	kitty.png
+15:04:05	received file: kitty.png, action: blur
+15:04:05	received from url: /process
+15:04:05	Saved file 'kitty.png' to 'images/blurredKitty.png'
+15:04:05	png
+15:04:05	sent response
+15:04:05	
+	2025-03-17 10:41:14.7876365 +0100 CET m=+0.020591101
+15:04:05	kitty.png
+15:04:05	received file: kitty.png, action: blur
+15:04:05	received from url: /process
+15:04:05	Saved file 'kitty.png' to 'images/kitty.png'
+15:04:05	png
+15:04:05	sent response

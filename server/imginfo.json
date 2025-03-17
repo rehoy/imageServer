@@ -1,10 +1,42 @@
 {
+  "Joachim.png": {
+    "filename": "Joachim.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "invert"
+    ]
+  },
+  "Rehaug.png": {
+    "filename": "Rehaug.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel"
+    ]
+  },
   "appledbe.jpg": {
     "filename": "appledbe.jpg",
     "format": "jpg",
     "original": false,
     "filters": [
       "blur"
+    ]
+  },
+  "arrows.png": {
+    "filename": "arrows.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "blur"
+    ]
+  },
+  "babab.png": {
+    "filename": "babab.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel"
     ]
   },
   "blurred.png": {
@@ -14,6 +46,14 @@
     "filters": [
       "blur",
       "invert"
+    ]
+  },
+  "blurredKitty.png": {
+    "filename": "blurredKitty.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "blur"
     ]
   },
   "capturecard.png": {
@@ -63,6 +103,14 @@
       "blur"
     ]
   },
+  "invert_.png": {
+    "filename": "invert_.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "invert"
+    ]
+  },
   "invertwhat.png": {
     "filename": "invertwhat.png",
     "format": "png",
@@ -74,6 +122,46 @@
       "invert"
     ]
   },
+  "jokko.png": {
+    "filename": "jokko.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "invert"
+    ]
+  },
+  "kitty.png": {
+    "filename": "kitty.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "blur"
+    ]
+  },
+  "knif.png": {
+    "filename": "knif.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel"
+    ]
+  },
+  "knifeee.png": {
+    "filename": "knifeee.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel"
+    ]
+  },
+  "knifefe.png": {
+    "filename": "knifefe.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "blur"
+    ]
+  },
   "piss.png": {
     "filename": "piss.png",
     "format": "png",
@@ -82,12 +170,45 @@
       "gray"
     ]
   },
+  "rea.png": {
+    "filename": "rea.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel"
+    ]
+  },
+  "reag.png": {
+    "filename": "reag.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel",
+      "invert"
+    ]
+  },
+  "reahug.png": {
+    "filename": "reahug.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel"
+    ]
+  },
   "shit.png": {
     "filename": "shit.png",
     "format": "png",
     "original": false,
     "filters": [
       "invert"
+    ]
+  },
+  "sobelPair.png": {
+    "filename": "sobelPair.png",
+    "format": "png",
+    "original": false,
+    "filters": [
+      "sobel"
     ]
   },
   "sobelby.jpeg": {
