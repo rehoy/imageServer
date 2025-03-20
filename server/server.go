@@ -243,7 +243,7 @@ func (s *Server) handleProcess(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) sendResponse(w http.ResponseWriter, result ResponseData, processed *image.RGBA, format string) {
-	writer := multipart.NewWriter(w)
+		writer := multipart.NewWriter(w)
 	defer writer.Close()
 
 	realBoundary := writer.Boundary()

@@ -81,3 +81,12 @@ document.getElementById('file').addEventListener('change', function (event) {
         imagePreview.style.display = 'none';
     }
 });
+
+const newElement = document.createElement('button');
+newElement.style.color = 'red';
+newElement.addEventListener('click', function () {
+    alert('Helllo, Wooorld!');
+});
+newElement.id = "newButton";
+newElement.textContent = "Click me!";
+document.body.appendChild(newElement);
